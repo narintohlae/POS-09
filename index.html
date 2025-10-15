@@ -2004,7 +2004,10 @@ unit.cost =
             changeEl.style.color = 'var(--success-color)'; 
         } else { 
             changeEl.textContent = 'เงินไม่พอ';
-            changeEl.style.color = 'var(--danger-color)'; 
+            changeEl.style.color = 'var(--danger-color)';
+            const cashInput = document.getElementById('cash-received-input');
+            cashInput.focus();
+            cashInput.select();
         } 
     },
 
@@ -2868,4 +2871,5 @@ function paginate(items, page=1, perPage=50){
 // === Accessibility helpers ===
 function applyA11yTable(el){ if(!el) return; el.setAttribute('role','table'); el.querySelectorAll('thead').forEach(th=>th.setAttribute('role','rowgroup')); }
 function applyA11yButton(el){ if(!el) return; el.setAttribute('role','button'); el.setAttribute('tabindex','0'); }
+
 function applyA11yModal(el){ if(!el) return; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); trapFocus(el); }

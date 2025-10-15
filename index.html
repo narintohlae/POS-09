@@ -2011,115 +2011,123 @@ unit.cost =
         } 
     },
 
-    async confirmSale() {
-        if (this.state.isSaving) return;
+async confirmSale() {
+    if (this.state.isSaving) return;
 
-        const collectionRef = this.getSalesHistoryCollectionRef();
-        // ✅ [MODIFIED] ตรวจสอบ `OfflineQueue` ก่อน เพื่อให้แน่ใจว่ามันถูกสร้างแล้ว
-        if (!collectionRef && !window.OfflineQueue) { 
-            this.showInfoModal("ข้อผิดพลาด", "ยังไม่ได้เชื่อมต่อกับฐานข้อมูลและไม่สามารถบันทึก Offline ได้", true); 
-            return;
-        }
+    const collectionRef = this.getSalesHistoryCollectionRef();
+    if (!collectionRef && !window.OfflineQueue) {
+        this.showInfoModal("ข้อผิดพลาด", "ยังไม่ได้เชื่อมต่อกับฐานข้อมูลและไม่สามารถบันทึก Offline ได้", true);
+        return;
+    }
 
-        const tabData = this.state.tabs.get(this.state.activeTabId);
-        if (!tabData) return;
-        const { cart, discount } = tabData;
-        const subtotal = cart.reduce((sum, item) => {
-            if (typeof item.priceOverride === 'number') {
-                return sum + (item.priceOverride * item.quantity);
-            }
-            return sum + this.calculateItemTotal(item.productUnit.pricingUnit, item.quantity);
-        }, 0);
-        const finalTotal = subtotal - discount;
-        const cashReceived = parseFloat(document.getElementById('cash-received-input').value) || 0;
-        if (cashReceived < finalTotal) { 
-            this.showInfoModal("ข้อผิดพลาด", "จำนวนเงินที่รับมาไม่เพียงพอ", true);
-            return; 
+    const tabData = this.state.tabs.get(this.state.activeTabId);
+    if (!tabData) return;
+    const { cart, discount } = tabData;
+    const subtotal = cart.reduce((sum, item) => {
+        if (typeof item.priceOverride === 'number') {
+            return sum + (item.priceOverride * item.quantity);
         }
-        this.state.isSaving = true;
-        const confirmButton = document.getElementById('confirm-sale-btn');
-        confirmButton.disabled = true;
+        return sum + this.calculateItemTotal(item.productUnit.pricingUnit, item.quantity);
+    }, 0);
+    const finalTotal = subtotal - discount;
+    const cashReceived = parseFloat(document.getElementById('cash-received-input').value) || 0;
+    
+    // [MODIFIED] ตรวจสอบยอดเงินและย้ายเคอร์เซอร์ถ้าไม่พอ
+    if (cashReceived < finalTotal) {
+        // เรียกใช้ฟังก์ชัน calculateChange() เพื่อแสดงสถานะ "เงินไม่พอ"
+        this.calculateChange();
         
-        const newSaleId = await this.generateSaleId();
-        const saleRecordItems = cart.map(item => {
-            const conversionFactor = item.productUnit?.pricingUnit?.conversionFactor || 1;
-            const costPerSellingUnit = item.productUnit?.pricingUnit?.cost || 0;
-            const costPerBaseUnit = conversionFactor > 0 ? costPerSellingUnit / conversionFactor : 0;
-            const pricePerUnit = typeof item.priceOverride === 'number' 
-                ? item.priceOverride 
-                : this.calculateItemTotal(item.productUnit.pricingUnit, item.quantity) / item.quantity;
-            return {
-                cartItemId: item.cartItemId, name: item.productUnit.display, unit: item.productUnit.pricingUnit.unitName,
-                quantity: item.quantity, price: pricePerUnit,
-                cost: costPerSellingUnit, productName: item.productUnit.productName, baseUnit: item.productUnit.baseUnit,
-                conversionFactor: conversionFactor, costPerBaseUnit: costPerBaseUnit,
-                productId: item.productUnit.productId
-            };
-        });
-
-        const saleRecord = {
-            id: newSaleId, timestamp: new Date().toISOString(), items: saleRecordItems, subtotal: subtotal,
-            discount: discount, total: finalTotal, cashReceived: cashReceived, change: cashReceived - finalTotal,
+        // ย้ายเคอร์เซอร์กลับไปที่ช่องรับเงิน
+        const cashInput = document.getElementById('cash-received-input');
+        cashInput.focus();
+        cashInput.select();
+        
+        // หยุดการทำงานของฟังก์ชันทันที
+        return; 
+    }
+    
+    this.state.isSaving = true;
+    const confirmButton = document.getElementById('confirm-sale-btn');
+    confirmButton.disabled = true;
+    
+    const newSaleId = await this.generateSaleId();
+    const saleRecordItems = cart.map(item => {
+        const conversionFactor = item.productUnit?.pricingUnit?.conversionFactor || 1;
+        const costPerSellingUnit = item.productUnit?.pricingUnit?.cost || 0;
+        const costPerBaseUnit = conversionFactor > 0 ? costPerSellingUnit / conversionFactor : 0;
+        const pricePerUnit = typeof item.priceOverride === 'number' 
+            ? item.priceOverride 
+            : this.calculateItemTotal(item.productUnit.pricingUnit, item.quantity) / item.quantity;
+        return {
+            cartItemId: item.cartItemId, name: item.productUnit.display, unit: item.productUnit.pricingUnit.unitName,
+            quantity: item.quantity, price: pricePerUnit,
+            cost: costPerSellingUnit, productName: item.productUnit.productName, baseUnit: item.productUnit.baseUnit,
+            conversionFactor: conversionFactor, costPerBaseUnit: costPerBaseUnit,
+            productId: item.productUnit.productId
         };
-        
-        const { api, db } = window.firebaseServices;
-        const productsCollectionRef = this.getProductsCollectionRef();
-        const batch = api.writeBatch(db);
-        
-        for (const item of cart) {
-            const productRef = api.doc(productsCollectionRef, item.productUnit.productId);
-            const quantityInBaseUnits = item.quantity * (item.productUnit.pricingUnit.conversionFactor || 1);
-            const currentStock = item.productUnit.stockInBaseUnits || 0;
-            const newStock = currentStock - quantityInBaseUnits;
-            batch.update(productRef, { stockInBaseUnits: newStock });
+    });
+
+    const saleRecord = {
+        id: newSaleId, timestamp: new Date().toISOString(), items: saleRecordItems, subtotal: subtotal,
+        discount: discount, total: finalTotal, cashReceived: cashReceived, change: cashReceived - finalTotal,
+    };
+    
+    const { api, db } = window.firebaseServices;
+    const productsCollectionRef = this.getProductsCollectionRef();
+    const batch = api.writeBatch(db);
+    
+    for (const item of cart) {
+        const productRef = api.doc(productsCollectionRef, item.productUnit.productId);
+        const quantityInBaseUnits = item.quantity * (item.productUnit.pricingUnit.conversionFactor || 1);
+        const currentStock = item.productUnit.stockInBaseUnits || 0;
+        const newStock = currentStock - quantityInBaseUnits;
+        batch.update(productRef, { stockInBaseUnits: newStock });
+    }
+    
+    try {
+        if (tabData.isEditing && tabData.originalFirestoreId) {
+            const oldSaleRef = api.doc(db, collectionRef.path, tabData.originalFirestoreId);
+            const newSaleRef = api.doc(collectionRef);
+            batch.delete(oldSaleRef);
+            batch.set(newSaleRef, saleRecord);
+        } else {
+            const newSaleDocRef = api.doc(collectionRef);
+            batch.set(newSaleDocRef, saleRecord);
         }
         
-        try {
-            if (tabData.isEditing && tabData.originalFirestoreId) {
-                const oldSaleRef = api.doc(db, collectionRef.path, tabData.originalFirestoreId);
-                const newSaleRef = api.doc(collectionRef);
-                batch.delete(oldSaleRef);
-                batch.set(newSaleRef, saleRecord);
-            } else {
-                const newSaleDocRef = api.doc(collectionRef);
-                batch.set(newSaleDocRef, saleRecord);
-            }
-            
-            await batch.commit();
+        await batch.commit();
 
+        this.hidePaymentModal();
+        const tabToDelete = this.state.activeTabId;
+        document.getElementById('edit-status').style.display = 'none';
+        this.closeTab(tabToDelete, false);
+
+    } catch (e) {
+        console.error("Error committing sale, saving to offline queue: ", e);
+        
+        if(window.OfflineQueue) {
+            window.OfflineQueue.push({
+                type: 'sale',
+                payload: saleRecord,
+                tabData: {
+                    isEditing: tabData.isEditing,
+                    originalFirestoreId: tabData.originalFirestoreId
+                }
+            });
+            this.showInfoModal("บันทึก Offline", "ไม่สามารถเชื่อมต่อฐานข้อมูลได้ บันทึกการขายนี้ไว้ในเครื่องแล้ว และจะส่งข้อมูลอีกครั้งเมื่อออนไลน์", false);
+            
             this.hidePaymentModal();
             const tabToDelete = this.state.activeTabId;
             document.getElementById('edit-status').style.display = 'none';
             this.closeTab(tabToDelete, false);
-
-        } catch (e) {
-            console.error("Error committing sale, saving to offline queue: ", e);
-            
-            // ✅ [MODIFIED] ส่วนสำคัญ: ถ้า try-catch ล้มเหลว ให้บันทึกลง Offline Queue
-            if(window.OfflineQueue) {
-                window.OfflineQueue.push({
-                    type: 'sale',
-                    payload: saleRecord,
-                    tabData: { // บันทึกข้อมูล tab ที่กำลังแก้ไขไปด้วย
-                        isEditing: tabData.isEditing,
-                        originalFirestoreId: tabData.originalFirestoreId
-                    }
-                });
-                this.showInfoModal("บันทึก Offline", "ไม่สามารถเชื่อมต่อฐานข้อมูลได้ บันทึกการขายนี้ไว้ในเครื่องแล้ว และจะส่งข้อมูลอีกครั้งเมื่อออนไลน์", false);
-                
-                // ปิดบิลและ Modal เหมือนกรณีสำเร็จ
-                this.hidePaymentModal();
-                const tabToDelete = this.state.activeTabId;
-                document.getElementById('edit-status').style.display = 'none';
-                this.closeTab(tabToDelete, false);
-            } else {
-                this.showInfoModal("ผิดพลาด", "เกิดข้อผิดพลาดในการบันทึกข้อมูลการขายและอัปเดตสต็อก!", true);
-            }
-        } finally {
-            this.state.isSaving = false;
-            confirmButton.disabled = false;
+        } else {
+            this.showInfoModal("ผิดพลาด", "เกิดข้อผิดพลาดในการบันทึกข้อมูลการขายและอัปเดตสต็อก!", true);
         }
-    },
+    } finally {
+        this.state.isSaving = false;
+        confirmButton.disabled = false;
+    }
+},
 
     printSaleRecordFromHistory(firestoreId) {
         const saleToPrint = this.state.salesHistory.find(s => s.firestoreId === firestoreId);
@@ -2873,3 +2881,4 @@ function applyA11yTable(el){ if(!el) return; el.setAttribute('role','table'); el
 function applyA11yButton(el){ if(!el) return; el.setAttribute('role','button'); el.setAttribute('tabindex','0'); }
 
 function applyA11yModal(el){ if(!el) return; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); trapFocus(el); }
+

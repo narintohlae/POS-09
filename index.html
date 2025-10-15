@@ -1994,22 +1994,21 @@ unit.cost =
         document.getElementById('payment-modal').style.display = 'none'; 
         document.getElementById('barcode-input').focus();
     },
-    calculateChange() { 
-        const total = parseFloat(document.getElementById('payment-total-final').textContent);
-        const cashReceived = parseFloat(document.getElementById('cash-received-input').value) || 0; 
-        const change = cashReceived - total; 
-        const changeEl = document.getElementById('payment-change');
-        if (change >= 0) { 
-            changeEl.textContent = change.toFixed(2);
-            changeEl.style.color = 'var(--success-color)'; 
-        } else { 
-            changeEl.textContent = 'เงินไม่พอ';
-            changeEl.style.color = 'var(--danger-color)';
-            const cashInput = document.getElementById('cash-received-input');
-            cashInput.focus();
-            cashInput.select();
-        } 
-    },
+calculateChange() {
+    const total = parseFloat(document.getElementById('payment-total-final').textContent);
+    const cashReceived = parseFloat(document.getElementById('cash-received-input').value) || 0;
+    const change = cashReceived - total;
+    const changeEl = document.getElementById('payment-change');
+    
+    if (change >= 0) {
+        changeEl.textContent = change.toFixed(2);
+        changeEl.style.color = 'var(--success-color)';
+    } else {
+        changeEl.textContent = 'เงินไม่พอ';
+        changeEl.style.color = 'var(--danger-color)';
+        // [REMOVED] ลบโค้ดส่วนที่ย้ายเคอร์เซอร์ออกจากฟังก์ชันนี้
+    }
+},
 
 async confirmSale() {
     if (this.state.isSaving) return;
@@ -2881,4 +2880,5 @@ function applyA11yTable(el){ if(!el) return; el.setAttribute('role','table'); el
 function applyA11yButton(el){ if(!el) return; el.setAttribute('role','button'); el.setAttribute('tabindex','0'); }
 
 function applyA11yModal(el){ if(!el) return; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); trapFocus(el); }
+
 

@@ -951,6 +951,68 @@ input[type="radio"].radio, .radio{ width:16px; height:16px; border:var(--border)
 /* ==== End Global System ==== */
 
 </style>
+
+<style id="history-summary-enhanced-css">
+/* History summary card */
+#history-product-count.summary-item {
+  display: none;
+  padding: 12px 14px;
+  background: #f7fbff;
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--primary-color);
+  border-radius: 10px;
+  margin: 0 0 10px 0;
+}
+#history-product-count .hs-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 16px;
+  align-items: center;
+}
+#history-product-count .hs-title {
+  font-weight: 700;
+  color: var(--dark-text);
+}
+#history-product-count .hs-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+#history-product-count .chip {
+  padding: 2px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-size: 0.85em;
+  background: white;
+}
+#history-product-count .hs-actions {
+  text-align: right;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+#history-product-count .hs-actions .link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9em;
+  color: var(--primary-color);
+  text-decoration: underline;
+  padding: 4px 6px;
+}
+/* Row highlight for matches */
+#history-table tr.product-match { background-color: #fff9e6; }
+#history-table tr.product-match:hover { background-color: #fff3cc; }
+#history-table .qty-badge {
+  display: inline-block;
+  min-width: 18px; text-align: center;
+  border-radius: 6px; padding: 0 6px;
+  border: 1px solid var(--border-color);
+  font-size: 0.8em;
+  margin-left: 6px;
+}
+</style>
+
 </head>
 <body class="density-compact">
 
@@ -2867,7 +2929,7 @@ async confirmSale() {
         });
         historyBody.innerHTML = '';
 
-        // === Product search count summary ===
+        // === Product search count summary [enhanced] ===
         (function () {
             const summaryEl = document.getElementById('history-product-count');
             if (!summaryEl) return;
@@ -2943,7 +3005,7 @@ async confirmSale() {
             summaryEl.innerHTML = `<div class="label" style="font-weight:bold;color:var(--secondary-color);margin-bottom:0.25rem;">สรุปตามคำค้น</div><div class="value" style="font-size:1.1em;color:var(--dark-text);">${mainLine}</div>`;
             summaryEl.style.display = 'block';
         }).call(this);
-        // === End product search count summary ===
+// replaced by enhanced version
 
 
         const now = new Date();

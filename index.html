@@ -1057,7 +1057,8 @@ input[type="radio"].radio, .radio{ width:16px; height:16px; border:var(--border)
 </div>
 
 
-<div id="history-modal" class="modal-overlay"> <div class="modal-content"> <div class="modal-body" style="display: flex; flex-direction: column;"> <section class="card" style="height: 100%; box-shadow: none; border: none; padding: 0;"> <h2>ประวัติการขาย</h2> <div id="history-filter-section"> <div class="filter-group"> <label for="history-search-input">ค้นหาบิล / สินค้า</label> <div class="input-with-icon"> <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span> <input type="text" id="history-search-input" placeholder="รหัสการขาย หรือชื่อสินค้า..."> </div> </div> <div class="filter-group"> <label for="start-date">ช่วงวันที่และเวลา</label> <div style="display: flex; gap: 0.5rem; align-items: center;"> <input type="date" id="start-date" title="วันที่เริ่มต้น"> <input type="time" id="start-time" title="เวลาเริ่มต้น" style="width: 110px;"> <span style="color: var(--secondary-color);">-</span> <input type="date" id="end-date" title="วันที่สิ้นสุด"> <input type="time" id="end-time" title="เวลาสิ้นสุด" style="width: 110px;"> </div> </div> <div class="filter-group"> <div style="display: flex; gap: 0.5rem;"> <button type="button" id="filter-history-btn" style="width: 100%;">ค้นหา</button> <button type="button" id="today-history-btn" style="background-color: var(--info-color); width: 100%;">วันนี้</button> </div> </div> </div> <div class="button-group" style="justify-content: flex-start; margin-bottom: 1rem; margin-top:0;"> <button type="button" id="export-excel-btn">Export to Excel</button> <button type="button" id="clear-all-history-btn" class="clear-cart" style="flex-grow: 0; margin-left: auto;">ล้างประวัติทั้งหมด</button> </div> <div id="history-table-wrapper"> <table id="history-table"> <thead><tr><th>วันที่/เวลา</th><th>รหัสการขาย</th><th>รายการสินค้า (จำนวน)</th><th>ส่วนลด</th><th>ยอดรวมสุทธิ</th><th>การกระทำ</th></tr></thead> <tbody id="history-body"></tbody> </table> </div> </section> </div> <div class="modal-footer"> <button type="button" class="close-main-modal-btn" style="background-color: var(--secondary-color);">ปิด</button> </div> </div> </div>
+<div id="history-modal" class="modal-overlay"> <div class="modal-content"> <div class="modal-body" style="display: flex; flex-direction: column;"> <section class="card" style="height: 100%; box-shadow: none; border: none; padding: 0;"> <h2>ประวัติการขาย</h2> <div id="history-filter-section"> <div class="filter-group"> <label for="history-search-input">ค้นหาบิล / สินค้า</label> <div class="input-with-icon"> <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span> <input type="text" id="history-search-input" placeholder="รหัสการขาย หรือชื่อสินค้า..."> </div> </div> <div class="filter-group"> <label for="start-date">ช่วงวันที่และเวลา</label> <div style="display: flex; gap: 0.5rem; align-items: center;"> <input type="date" id="start-date" title="วันที่เริ่มต้น"> <input type="time" id="start-time" title="เวลาเริ่มต้น" style="width: 110px;"> <span style="color: var(--secondary-color);">-</span> <input type="date" id="end-date" title="วันที่สิ้นสุด"> <input type="time" id="end-time" title="เวลาสิ้นสุด" style="width: 110px;"> </div> </div> <div class="filter-group"> <div style="display: flex; gap: 0.5rem;"> <button type="button" id="filter-history-btn" style="width: 100%;">ค้นหา</button> <button type="button" id="today-history-btn" style="background-color: var(--info-color); width: 100%;">วันนี้</button> </div> </div> </div> <div class="button-group" style="justify-content: flex-start; margin-bottom: 1rem; margin-top:0;"> <button type="button" id="export-excel-btn">Export to Excel</button> <button type="button" id="clear-all-history-btn" class="clear-cart" style="flex-grow: 0; margin-left: auto;">ล้างประวัติทั้งหมด</button> </div> <div id="history-product-count" class="summary-item" style="margin:0 0 1rem 0; display:none; text-align:left;"></div>
+<div id="history-table-wrapper"> <table id="history-table"> <thead><tr><th>วันที่/เวลา</th><th>รหัสการขาย</th><th>รายการสินค้า (จำนวน)</th><th>ส่วนลด</th><th>ยอดรวมสุทธิ</th><th>การกระทำ</th></tr></thead> <tbody id="history-body"></tbody> </table> </div> </section> </div> <div class="modal-footer"> <button type="button" class="close-main-modal-btn" style="background-color: var(--secondary-color);">ปิด</button> </div> </div> </div>
 <div id="settings-modal" class="modal-overlay"> <div class="modal-content"> <div class="modal-body"> <section class="card" style="height: 100%; box-shadow: none; border: none; padding: 0;"> <h2>การตั้งค่าและจัดการ</h2> <div class="button-group"> <button type="button" id="manage-products-btn" style="background-color: var(--info-color);"> <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg> จัดการสินค้า </button> <button type="button" id="import-from-sheet-btn" style="background-color: var(--success-color);"> <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> นำเข้า/อัปเดตจาก Google Sheet </button> <button type="button" id="receipt-settings-btn" style="background-color: var(--secondary-color);"> <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> ตั้งค่าใบเสร็จ </button> </div> <div style="margin-top: 1rem; display: flex; align-items: center;"> <input type="checkbox" id="auto-import-toggle" style="width: auto; margin-right: 0.5rem;" checked> <label for="auto-import-toggle">นำเข้าข้อมูลอัตโนมัติเมื่อมีการเปลี่ยนแปลง (ตรวจสอบทุก 5 นาที)</label> </div> </section> </div> <div class="modal-footer"> <button type="button" class="close-main-modal-btn" style="background-color: var(--secondary-color);">ปิด</button> </div> </div> </div>
 <div id="receipt-settings-modal" class="modal-overlay"> <div class="modal-content"> <div class="modal-header"> <h3>ตั้งค่าข้อมูลใบเสร็จ</h3> </div> <div class="modal-body"> <div class="form-group"> <label for="receipt-store-name">ชื่อร้านค้า</label> <input type="text" id="receipt-store-name" placeholder="ระบุชื่อร้านค้าของคุณ"> </div> <div class="form-group"> <label for="receipt-address">ที่อยู่</label> <input type="text" id="receipt-address" placeholder="เช่น 123/45 ถนน ABC, แขวง/ตำบล XYZ..."> </div> <div class="form-group"> <label for="receipt-phone">เบอร์โทรศัพท์</label> <input type="text" id="receipt-phone" placeholder="เช่น 02-123-4567"> </div> <div class="form-group"> <label for="receipt-tax-id">เลขประจำตัวผู้เสียภาษี</label> <input type="text" id="receipt-tax-id" placeholder="ระบุเลข 13 หลัก"> </div> </div> <div class="modal-footer"> <div class="button-group"> <button type="button" id="cancel-receipt-settings-btn" style="background-color:var(--secondary-color)">ยกเลิก</button> <button type="button" id="save-receipt-settings-btn" class="finish-sale">บันทึก</button> </div> </div> </div> </div>
 <div id="payment-modal" class="modal-overlay"> <div class="modal-content"> <div class="modal-header"><h3>ชำระเงิน</h3></div> <div class="modal-body"> <div class="payment-modal-body"> <div class="payment-row"><span class="payment-label">ยอดสุทธิ</span><span class="payment-amount" id="payment-total-final">0.00</span></div> <div class="payment-row"><label for="cash-received-input" class="payment-label">รับเงินมา</label><input type="number" id="cash-received-input" step="any" placeholder="0.00"></div> <div class="payment-row"><span class="payment-label">เงินทอน</span><span class="payment-amount" id="payment-change">0.00</span></div> </div> </div> <div class="modal-footer"> <div class="button-group"> <button type="button" id="cancel-payment-btn" style="background-color:var(--secondary-color)">ยกเลิก (ESC)</button> <button type="button" id="confirm-sale-btn" class="finish-sale">ยืนยันการขาย (Enter)</button> </div> </div> </div> </div>
@@ -2865,6 +2866,86 @@ async confirmSale() {
             return searchFilter === '' || saleIdMatch || itemMatch;
         });
         historyBody.innerHTML = '';
+
+        // === Product search count summary ===
+        (function () {
+            const summaryEl = document.getElementById('history-product-count');
+            if (!summaryEl) return;
+
+            const q = (searchFilter || '').trim();
+            if (!q) { summaryEl.style.display = 'none'; summaryEl.innerHTML = ''; return; }
+
+            let totalSellingQty = 0;
+            let totalBaseQty = 0;
+            const sellingUnits = new Set();
+            const baseUnits = new Set();
+            let matchedAny = false;
+
+            // iterate only items that match product name, not sale id
+            filteredHistory.forEach(sale => {
+                (sale.items || []).forEach(item => {
+                    const name = (item.productName || item.name || '').toLowerCase();
+                    if (!name.includes(q)) return;
+
+                    matchedAny = true;
+                    const qty = Number(item.quantity) || 0;
+                    const unitName = item.unit || item.sellingUnit || (item.pricingUnit && item.pricingUnit.unitName) || '';
+                    const conv = Number(item.conversionFactor) || 1;
+                    const baseName = item.baseUnit || unitName || 'หน่วย';
+
+                    totalSellingQty += qty;
+                    totalBaseQty += qty * conv;
+                    if (unitName) sellingUnits.add(unitName);
+                    if (baseName) baseUnits.add(baseName);
+                });
+            });
+
+            if (!matchedAny) { summaryEl.style.display = 'none'; summaryEl.innerHTML = ''; return; }
+
+            // Build date-range label
+            const startDate = document.getElementById('start-date')?.value;
+            const endDate = document.getElementById('end-date')?.value;
+            let rangeText = '';
+            if (startDate && endDate) {
+                try {
+                    const s = new Date(startDate);
+                    const e = new Date(endDate);
+                    rangeText = `ในช่วง ${s.toLocaleDateString('th-TH')} – ${e.toLocaleDateString('th-TH')}`;
+                } catch (_) { /* ignore */ }
+            }
+
+            // Prefer selling unit if consistent, else show base unit
+            let mainLine = '';
+            if (sellingUnits.size === 1) {
+                const u = Array.from(sellingUnits)[0];
+                mainLine = `สินค้า “${this.escapeHtml(document.getElementById('history-search-input').value)}” ขายรวม ${totalSellingQty} ${u} ${rangeText}`;
+                // If base unit differs and conversion applied, append base summary
+                if (baseUnits.size === 1) {
+                    const bu = Array.from(baseUnits)[0];
+                    if (bu && bu !== u) {
+                        mainLine += ` (เทียบเท่า ${totalBaseQty} ${bu})`;
+                    }
+                }
+            } else {
+                // Mixed selling units. Report only in base units if consistent
+                if (baseUnits.size >= 1) {
+                    const bu = Array.from(baseUnits)[0];
+                    mainLine = `สินค้า “${this.escapeHtml(document.getElementById('history-search-input').value)}” ขายรวม ${totalBaseQty} ${bu} ${rangeText}`;
+                    if (baseUnits.size > 1) {
+                        mainLine += ` (หลายหน่วยฐาน)`;
+                    }
+                } else {
+                    // Fallback
+                    mainLine = `สินค้า “${this.escapeHtml(document.getElementById('history-search-input').value)}” ขายรวม ${totalSellingQty} หน่วย ${rangeText}`;
+                }
+            }
+
+            summaryEl.innerHTML = `<div class="label" style="font-weight:bold;color:var(--secondary-color);margin-bottom:0.25rem;">สรุปตามคำค้น</div><div class="value" style="font-size:1.1em;color:var(--dark-text);">${mainLine}</div>`;
+            summaryEl.style.display = 'block';
+        }).call(this);
+        // === End product search count summary ===
+
+
         const now = new Date();
         const startOfCurrentHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours());
         if (filteredHistory.length === 0) {
@@ -3328,4 +3409,3 @@ function applyA11yTable(el){ if(!el) return; el.setAttribute('role','table'); el
 function applyA11yButton(el){ if(!el) return; el.setAttribute('role','button'); el.setAttribute('tabindex','0'); }
 
 function applyA11yModal(el){ if(!el) return; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); trapFocus(el); }
-

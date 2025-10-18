@@ -1052,6 +1052,100 @@ input[type="radio"].radio, .radio{ width:16px; height:16px; border:var(--border)
 }
 </style>
 
+
+
+
+
+<style>
+/* === Cart-aligned utility bar: app-sidebar + auth-status (Oct 18, 2025) === */
+/* Tokens */
+:root{
+  --cart-surface: var(--surface-2, #ffffff);
+  --cart-border: var(--border, #e5e7eb);
+  --cart-muted: var(--muted-foreground, #6b7280);
+  --cart-radius: var(--radius, 12px);
+  --ui-height: var(--ui-height, 40px);
+  --ui-font: var(--ui-font, 14px);
+  --ui-icon: var(--ui-icon, 16px);
+}
+
+/* Utility group matches cart cards */
+.cart-tabs-container{ display:flex; align-items:center; }
+.cart-utility{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-left:auto;
+  padding:8px 10px;
+  background: var(--cart-surface);
+  border: 1px solid var(--cart-border);
+  border-radius: var(--cart-radius);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* Sidebar controls as cart chips */
+#app-sidebar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0;
+}
+#app-sidebar .btn,
+#app-sidebar [role="button"],
+#app-sidebar button{
+  height: calc(var(--ui-height) * 1.05);
+  padding: 0 0.9rem;
+  font-size: calc(var(--ui-font) * 1.05);
+  line-height:1;
+  border: 1px solid var(--cart-border);
+  border-radius: calc(var(--cart-radius) - 4px);
+  background: transparent;
+}
+#app-sidebar .btn:hover,
+#app-sidebar [role="button"]:hover,
+#app-sidebar button:hover{
+  background: rgba(0,0,0,0.03);
+}
+
+/* Auth status as compact pill */
+#auth-status{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  height: calc(var(--ui-height) * 0.9 * 1.05);
+  padding: 0 0.6rem;
+  border: 1px solid var(--cart-border);
+  border-radius: 999px;
+  font-size: calc(var(--ui-font) * 0.95 * 1.05);
+  color: var(--cart-muted);
+  background: #fff;
+}
+#auth-status .dot{
+  width: calc(var(--ui-icon) * 0.38 * 1.05);
+  height: calc(var(--ui-icon) * 0.38 * 1.05);
+  border-radius:50%;
+}
+
+/* Spacing harmony with cart header */
+.cart-header, .cart-tabs-container{
+  gap: 12px;
+}
+
+/* Responsive */
+@media (max-width: 640px){
+  .cart-utility{
+    width:100%;
+    justify-content:space-between;
+    gap:8px;
+    padding:6px 8px;
+  }
+  #app-sidebar{
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+}
+</style>
+
 </head>
 <body class="density-compact">
 
@@ -1091,9 +1185,7 @@ input[type="radio"].radio, .radio{ width:16px; height:16px; border:var(--border)
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
                 </div>
-                
-<div id="auth-status" class="auth-status-badge" aria-live="polite" title="สถานะผู้ใช้" role="status"><span class="dot"></span><span>ยังไม่ได้เข้าสู่ระบบ</span></div>
-<aside id="app-sidebar">
+<div class="cart-utility" role="group" aria-label="Cart utilities"><aside id="app-sidebar">
                     <button class="sidebar-btn" data-view="history" title="ประวัติ (F5)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
                         <span>ประวัติ</span>
@@ -1112,6 +1204,8 @@ input[type="radio"].radio, .radio{ width:16px; height:16px; border:var(--border)
                     </button>
     
                 </aside>
+                
+<div id="auth-status" class="auth-status-badge" aria-live="polite" title="สถานะผู้ใช้" role="status"><span class="dot"></span><span>ยังไม่ได้เข้าสู่ระบบ</span></div></div>
             </div>
             <div id="edit-status" style="display: none; padding: 10px; background-color: #fff3cd; color: #856404; border-radius: 4px; margin-bottom: 1rem; margin-top:1rem;"></div>
             <div class="cart-header-row">

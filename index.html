@@ -1063,7 +1063,7 @@ input[type="radio"].radio, .radio{ width:16px; height:16px; border:var(--border)
                 ค้นหาสินค้า
             </h2>
             <div class="form-group">
-                <input type="text" id="barcode-input" placeholder="ค้นหา... (เช่น: 1234.)" data-base-placeholder="ค้นหา... (เช่น: 1234.)" autofocus>
+                <input type="text" id="barcode-input" placeholder="ค้นหา... (เช่น: 1234.)" data-base-placeholder="ค้นหา... (เช่น: 1234.)">
             </div>
             <div id="main-search-area">
                 <div id="sales-summary-section" style="display: none; margin-bottom: 1rem;">
@@ -1259,6 +1259,14 @@ function updateCartHighlight(li, qty) {
 }
 
 const POS_APP = {
+focusSearchIfReady() {
+  try {
+    if (this.state && this.state.isAuthenticated && !this.state.activeOverlay) {
+      this.focusSearchIfReady();
+    }
+  } catch(e){}
+},
+
 updateAuthStatus(){
   const el = document.getElementById('auth-status');
   if(!el){ return; }
@@ -1414,7 +1422,7 @@ updateAuthStatus(){
         this.toggleUIVisibility();
     this.updateAuthStatus(); 
         this.setActiveOverlay(null);
-        document.getElementById('barcode-input')?.focus();
+        this.focusSearchIfReady();
         this.startAutoImportPolling();
     },
 
@@ -1424,7 +1432,7 @@ updateAuthStatus(){
             btn.classList.toggle('active', btn.dataset.view === overlayName);
         });
         if (!overlayName) {
-            document.getElementById('barcode-input')?.focus();
+            this.focusSearchIfReady();
         }
     },
 
@@ -2496,7 +2504,7 @@ unit.cost =
         } 
         else if (e.key === 'F3') { 
             e.preventDefault();
-            document.getElementById('barcode-input').focus(); 
+            this.focusSearchIfReady(); 
         } else if (e.key === 'F5') {
             e.preventDefault();
             this.showHistoryModal();
@@ -2614,7 +2622,7 @@ unit.cost =
     },
     hidePaymentModal() { 
         document.getElementById('payment-modal').style.display = 'none'; 
-        document.getElementById('barcode-input').focus();
+        this.focusSearchIfReady();
     },
 calculateChange() {
     const total = parseFloat(document.getElementById('payment-total-final').textContent);
@@ -3210,7 +3218,7 @@ const itemDetails = sale.items.map(item => {
         this.state.activeTabId = tabId;
         this.renderTabs(); 
         this.updateCartDisplay(); 
-        document.getElementById('barcode-input').focus(); 
+        this.focusSearchIfReady(); 
     },
     closeTab(tabId, confirm = true) {
         const tabData = this.state.tabs.get(tabId);

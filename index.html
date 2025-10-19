@@ -1354,9 +1354,14 @@ function updateCartHighlight(li, qty) {
 
 const POS_APP = {
 focusSearchIfReady() {
+  
   try {
-    if (this.state && this.state.isAuthenticated && !this.state.activeOverlay) {
-      this.focusSearchIfReady();
+    // Focus the search box when ready. No recursion.
+    var el = document.getElementById('barcode-input') 
+          || document.querySelector('[data-role="search-barcode"], #search-input, input[name="barcode"], input[type="search"]');
+    if (el && !el.disabled) {
+      try { el.focus({preventScroll:true}); } catch(e){ el.focus(); }
+      try { el.select && el.select(); } catch(e){}
     }
   } catch(e){}
 },

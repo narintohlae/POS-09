@@ -1356,7 +1356,23 @@ const POS_APP = {
 focusSearchIfReady() {
   
   try {
-    // Focus the search box when ready. No recursion.
+    // Skip when a modal/login popup is visible
+    var hasModal = (function(){
+      var sels = '[aria-modal="true"],[role="dialog"],.modal.show,.modal[style*="display: block"],.ui-dialog,.ant-modal,.swal2-container,.bootbox,.popup,.dialog,#login-modal,.login-modal,.login-overlay';
+      var nodes = document.querySelectorAll(sels);
+      for (var i=0;i<nodes.length;i++){
+        var n = nodes[i], cs = window.getComputedStyle(n), r = n.getBoundingClientRect();
+        if (cs && cs.display !== 'none' && cs.visibility !== 'hidden' && r.width > 0 && r.height > 0) return true;
+      }
+      var pwd = document.querySelector('input[type="password"]');
+      if (pwd){
+        var cs2 = window.getComputedStyle(pwd), r2 = pwd.getBoundingClientRect();
+        if (cs2 && cs2.display !== 'none' && cs2.visibility !== 'hidden' && r2.width > 0 && r2.height > 0) return true;
+      }
+      return false;
+    })();
+    if (hasModal) return;
+    // Focus the search box when ready
     var el = document.getElementById('barcode-input') 
           || document.querySelector('[data-role="search-barcode"], #search-input, input[name="barcode"], input[type="search"]');
     if (el && !el.disabled) {
@@ -1364,6 +1380,7 @@ focusSearchIfReady() {
       try { el.select && el.select(); } catch(e){}
     }
   } catch(e){}
+
 },
 
 updateAuthStatus(){
@@ -3689,3 +3706,43 @@ function applyA11yTable(el){ if(!el) return; el.setAttribute('role','table'); el
 function applyA11yButton(el){ if(!el) return; el.setAttribute('role','button'); el.setAttribute('tabindex','0'); }
 
 function applyA11yModal(el){ if(!el) return; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); trapFocus(el); }
+<script>
+(function(){
+  if (window.__F3FocusBound) return;
+  window.__F3FocusBound = true;
+
+  function modalOpen(){
+    var sels = '[aria-modal="true"],[role="dialog"],.modal.show,.modal[style*="display: block"],.ui-dialog,.ant-modal,.swal2-container,.bootbox,.popup,.dialog,#login-modal,.login-modal,.login-overlay';
+    var nodes = document.querySelectorAll(sels);
+    for (var i=0;i<nodes.length;i++){
+      var n = nodes[i], cs = window.getComputedStyle(n), r = n.getBoundingClientRect();
+      if (cs && cs.display !== 'none' && cs.visibility !== 'hidden' && r.width > 0 && r.height > 0) return true;
+    }
+    var pwd = document.querySelector('input[type="password"]');
+    if (pwd){
+      var cs2 = window.getComputedStyle(pwd), r2 = pwd.getBoundingClientRect();
+      if (cs2 && cs2.display !== 'none' && cs2.visibility !== 'hidden' && r2.width > 0 && r2.height > 0) return true;
+    }
+    return false;
+  }
+
+  function focusSearch(){
+    var el = document.getElementById('barcode-input')
+          || document.querySelector('[data-role="search-barcode"], #search-input, input[name="barcode"], input[type="search"]');
+    if (el && !el.disabled) {
+      try { el.focus({preventScroll:false}); } catch(e){ el.focus(); }
+      try { el.select && el.select(); } catch(e){}
+    }
+  }
+
+  window.addEventListener('keydown', function(ev){
+    if (ev.isComposing) return;
+    if (ev.key === 'F3') {
+      if (modalOpen()) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      focusSearch();
+    }
+  }, true);
+})();
+</script>

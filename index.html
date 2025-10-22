@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>ระบบขายหน้าร้าน (POS) - UI ใหม่</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,7 +31,7 @@
         background-color: var(--light-bg);
         color: var(--dark-text);
         margin: 0;
-        height: 100vh;
+        height: calc(var(--vh) * 100);
         overflow: hidden;
         /* [ADJUSTED] ขนาดฟอนต์หลักแบบกระชับ */
         font-size: 1.13em;
@@ -89,13 +89,13 @@
     /* --- Main Content Columns --- */
     .search-column {
         padding: var(--gap);
-        height: 100vh;
+        height: calc(var(--vh) * 100);
         box-sizing: border-box;
         display: flex;
     }
     .cart-column {
         padding: var(--gap) var(--gap) var(--gap) 0;
-        height: 100vh;
+        height: calc(var(--vh) * 100);
         box-sizing: border-box;
         display: flex;
     }
@@ -1146,6 +1146,50 @@ input[type="radio"].radio, .radio{ width:16px; height:16px; border:var(--border)
 }
 </style>
 
+
+<style id="mobile-pro-overrides">
+@supports (padding: max(0px)) {
+  :root {
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+  }
+}
+:root{ --vh: 1vh; }
+@media (max-width: 640px){
+  html, body { height: auto; overflow: auto; }
+  body { font-size: 16px; padding-bottom: max(84px, var(--safe-bottom)); }
+  .card { border-radius: 12px; }
+  button, input, select { min-height: 44px; }
+  .app-layout { display:block; }
+  .search-column, .cart-column { min-height: auto; }
+  #cart-items{ max-height: none; }
+  .button-group-2{
+    position: fixed;
+    left: 8px; right: 8px;
+    bottom: calc(8px + var(--safe-bottom));
+    z-index: 1002;
+    background: rgba(255,255,255,.98);
+    -webkit-backdrop-filter: saturate(1.1) blur(6px);
+    backdrop-filter: saturate(1.1) blur(6px);
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  }
+  .totals-section{ padding-bottom: 6px; }
+  .total-row{ font-size: 1rem; }
+  #cart-total{ font-size: 1.6rem; }
+  #cart-tabs{ scroll-snap-type: x mandatory; gap: .25rem; }
+  #cart-tabs .tab-button{ scroll-snap-align: start; }
+  .search-item{ padding: 14px 12px; }
+  #cart-items li{ padding: 8px 10px; }
+  .delete-item-btn{ width: 34px; height: 34px; }
+  .cart-header-row{ position: sticky; top: calc(8px + var(--safe-top)); background:#fff; z-index: 5; }
+  .modal-content{ width: 96vw !important; height: 92vh !important; border-radius: 12px; }
+  .modal-body{ overscroll-behavior: contain; }
+}
+.modal-overlay{ overscroll-behavior: contain; }
+</style>
 </head>
 <body class="density-compact">
 
@@ -3616,3 +3660,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+<script>
+(function(){
+  function setVh(){
+    var vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', vh + 'px');
+  }
+  setVh();
+  window.addEventListener('resize', setVh, {passive:true});
+  window.addEventListener('orientationchange', setVh);
+})();
+</script>

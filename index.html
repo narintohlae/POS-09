@@ -1727,8 +1727,24 @@ updateAuthStatus(){
         document.getElementById('clear-local-btn').addEventListener('click', this.clearHistoryLocally.bind(this));
         document.getElementById('clear-db-btn').addEventListener('click', this.executeClearAllHistory.bind(this));
         document.getElementById('cancel-clear-btn').addEventListener('click', this.hideClearOptionsModal.bind(this));
-        document.getElementById('clear-range-local-btn')?.addEventListener('click', this.clearHistoryLocallyByRange.bind(this));
-document.getElementById('clear-range-db-btn')?.addEventListener('click', this.executeClearHistoryByRange.bind(this));
+        const _crl = document.getElementById('clear-range-local-btn');
+if (_crl) _crl.addEventListener('click', (ev) => {
+  const app = window.POS_APP || this;
+  if (app && typeof app.clearHistoryLocallyByRange === 'function') {
+    app.clearHistoryLocallyByRange.call(app, ev);
+  } else {
+    console.warn('clearHistoryLocallyByRange is not available');
+  }
+});
+const _crd = document.getElementById('clear-range-db-btn');
+if (_crd) _crd.addEventListener('click', (ev) => {
+  const app = window.POS_APP || this;
+  if (app && typeof app.executeClearHistoryByRange === 'function') {
+    app.executeClearHistoryByRange.call(app, ev);
+  } else {
+    console.warn('executeClearHistoryByRange is not available');
+  }
+});
 document.getElementById('info-modal-ok-btn').addEventListener('click', this.hideInfoModal.bind(this));
         document.addEventListener('keydown', this.handleGlobalKeyDown.bind(this));
         document.getElementById('manage-products-btn').addEventListener('click', this.showProductMgmtModal.bind(this));
@@ -3683,3 +3699,116 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('orientationchange', setVh);
 })();
 </script></body></html>
+
+<script>
+// === Augmented: clear history by selected date-time range ===
+(function(){
+  // Define once
+  if (window.__pos09_range_bootstrap__) return;
+  window.__pos09_range_bootstrap__ = true;
+
+  function installInto(app){
+    if (!app) return false;
+
+    // Helper: parse range
+    if (typeof app.getSelectedDateRangeISO !== 'function') {
+      app.getSelectedDateRangeISO = function() {
+        const sd = document.getElementById('start-date')?.value;
+        const ed = document.getElementById('end-date')?.value;
+        const st = document.getElementById('start-time')?.value || '00:00';
+        const et = document.getElementById('end-time')?.value || '23:59';
+        if (!sd || !ed) {
+          this.showInfoModal?.("ช่วงเวลาไม่ครบ", "กรุณาเลือกวันที่เริ่มและสิ้นสุดก่อนล้างประวัติ", true);
+          throw new Error("range-missing");
+        }
+        const start = new Date(`${sd}T${st}`);
+        const end   = new Date(`${ed}T${et}`);
+        if (!(start instanceof Date) || isNaN(start) || !(end instanceof Date) || isNaN(end) || end < start) {
+          this.showInfoModal?.("ช่วงเวลาไม่ถูกต้อง", "โปรดตรวจสอบวันที่และเวลาให้ถูกต้อง", true);
+          throw new Error("range-invalid");
+        }
+        return { start, end, startISO: start.toISOString(), endISO: end.toISOString() };
+      };
+    }
+
+    // Local clear
+    app.clearHistoryLocallyByRange = function() {
+      let range;
+      try { range = this.getSelectedDateRangeISO(); } catch(e) { return; }
+      const { start, end } = range;
+      const before = Array.isArray(this.state?.salesHistory) ? this.state.salesHistory.length : 0;
+      if (!Array.isArray(this.state?.salesHistory)) this.state = { ...(this.state||{}), salesHistory: [] };
+      this.state.salesHistory = this.state.salesHistory.filter(s => {
+        const t = new Date(s.timestamp).getTime();
+        if (isNaN(t)) return true;
+        return t < start.getTime() || t > end.getTime();
+      });
+      const after = this.state.salesHistory.length;
+      const removed = Math.max(0, before - after);
+      this.updateHistoryDisplay?.();
+      this.hideClearOptionsModal?.();
+      this.showInfoModal?.("สำเร็จ", `ล้างเฉพาะหน้าแล้ว ${removed} บิล ในช่วงที่เลือก`, false);
+    };
+
+    // DB clear
+    app.executeClearHistoryByRange = async function() {
+      let range;
+      try { range = this.getSelectedDateRangeISO(); } catch(e) { return; }
+      this.hideClearOptionsModal?.();
+      const { start, end, startISO, endISO } = range;
+      const services = window.firebaseServices || {};
+      const api = services.api;
+      const db = services.db;
+      const salesCollection = this.getSalesHistoryCollectionRef?.();
+      if (!api || !db || !salesCollection) {
+        this.showInfoModal?.("ผิดพลาด", "ไม่พบการตั้งค่าฐานข้อมูล", true);
+        return;
+      }
+      try {
+        const querySnapshot = await api.getDocs(salesCollection);
+        const batch = api.writeBatch(db);
+        let toDelete = 0;
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const ts = data && data.timestamp;
+          if (typeof ts === 'string' && ts >= startISO && ts <= endISO) {
+            batch.delete(doc.ref);
+            toDelete += 1;
+          }
+        });
+        if (toDelete > 0) await batch.commit();
+        if (Array.isArray(this.state?.salesHistory)) {
+          this.state.salesHistory = this.state.salesHistory.filter(s => {
+            const t = new Date(s.timestamp).getTime();
+            if (isNaN(t)) return true;
+            return t < start.getTime() || t > end.getTime();
+          });
+          this.updateHistoryDisplay?.();
+        }
+        this.showInfoModal?.("สำเร็จ", `ล้างจากฐานข้อมูลแล้ว ${toDelete} บิล ในช่วงที่เลือก`, false);
+      } catch (e) {
+        console.error("executeClearHistoryByRange error:", e);
+        this.showInfoModal?.("ผิดพลาด", "เกิดข้อผิดพลาดในการล้างประวัติตามช่วงเวลา", true);
+      }
+    };
+
+    return true;
+  }
+
+  function ensure(){
+    const app = window.POS_APP;
+    if (!app) return false;
+    return installInto(app);
+  }
+
+  if (!ensure()) {
+    // Try on DOM ready and window load
+    document.addEventListener('DOMContentLoaded', ensure);
+    window.addEventListener('load', ensure);
+    // Poll for late creation of POS_APP
+    const t = setInterval(() => { if (ensure()) clearInterval(t); }, 150);
+    // Optional: if app exposes a ready event
+    try { window.addEventListener('posapp-ready', ensure); } catch(_e) {}
+  }
+})();
+</script>

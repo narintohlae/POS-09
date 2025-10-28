@@ -989,6 +989,13 @@ input[type="radio"].radio, .radio{ width:16px; height:16px; border:var(--border)
     border-color: var(--primary-color);
 }
 /* ==== End Quick Range Toolbar ==== */
+
+/* --- Patch: hide history search icon on focus or when input has text --- */
+#history-modal .input-with-icon:focus-within .icon { display: none; }
+#history-modal .input-with-icon:focus-within input { padding-left: 12px; }
+#history-modal .input-with-icon.has-text .icon { display: none; }
+#history-modal .input-with-icon.has-text input { padding-left: 12px; }
+/* --- End patch --- */
 </style>
 
 <style id="history-summary-enhanced-css">
@@ -3698,7 +3705,28 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('resize', setVh, {passive:true});
   window.addEventListener('orientationchange', setVh);
 })();
-</script></body></html>
+</script>
+<!-- Patch: toggle .has-text on history search input -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var hsi = document.getElementById('history-search-input');
+  if (hsi) {
+    var wrap = hsi.closest('.input-with-icon');
+    function update() {
+      if (wrap) {
+        var hasText = hsi.value.trim() !== '';
+        if (hasText) { wrap.classList.add('has-text'); }
+        else { wrap.classList.remove('has-text'); }
+      }
+    }
+    hsi.addEventListener('input', update);
+    // Initial state on load
+    update();
+  }
+});
+</script>
+<!-- End Patch -->
+</body></html>
 
 <script>
 // === Augmented: clear history by selected date-time range ===
@@ -3812,5 +3840,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 })();
 </script>
-
 

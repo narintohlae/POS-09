@@ -3527,17 +3527,45 @@ const itemDetails = sale.items.map(item => {
             if (error.code === 'permission-denied') { this.showInfoModal("ข้อผิดพลาด Firestore", "การเชื่อมต่อ Firestore ล้มเหลว! (permission-denied)", true); } 
         });
     },
-    async generateSaleId() { 
-        const today = new Date();
-        const datePrefix = `${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`; 
-        if (this.state.lastSaleDate !== datePrefix) { 
-            this.state.dailySaleCounter = 0;
-            this.state.lastSaleDate = datePrefix; 
-        } 
-        const todaySalesInHistory = this.state.salesHistory.filter(sale => sale.id && sale.id.startsWith(datePrefix));
-        this.state.dailySaleCounter = todaySalesInHistory.length + 1; 
-        return `${datePrefix}-${this.state.dailySaleCounter.toString().padStart(4, '0')}`; 
-    },
+    
+async generateSaleId() {
+  try {
+    const today = new Date();
+    const datePrefix = `${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
+
+    // Ensure state fields exist
+    if (!this.state) this.state = {};
+    if (this.state.lastSaleDate !== datePrefix) {
+      this.state.dailySaleCounter = 0;
+      this.state.lastSaleDate = datePrefix;
+    }
+
+    // Determine a base counter using in-memory state plus existing history
+    let baseCounter = (this.state.dailySaleCounter || 0) + 1;
+    try {
+      if (Array.isArray(this.state.salesHistory)) {
+        const todayCount = this.state.salesHistory.filter(s => s && s.id && s.id.startsWith(datePrefix)).length;
+        baseCounter = Math.max(baseCounter, todayCount + 1);
+      }
+    } catch (err) {
+      // ignore and use in-memory counter
+    }
+
+    this.state.dailySaleCounter = baseCounter;
+
+    // Add millisecond + short random suffix to avoid collisions across machines/tabs
+    const milli = (new Date()).getMilliseconds().toString().padStart(3, '0');
+    const rand3 = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+
+    return `${datePrefix}-${String(baseCounter).padStart(4, '0')}-${milli}${rand3}`;
+  } catch (err) {
+    console.error('generateSaleId error (fallback):', err);
+    // Fallback using timestamp to avoid duplicate IDs
+    const ts = Date.now();
+    return `F-${ts}`;
+  }
+}
+,
     exportToExcel() {
         const dataToExport = this.state.salesHistory.flatMap(sale =>
             sale.items.map(item => {

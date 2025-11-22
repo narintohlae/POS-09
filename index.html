@@ -1929,19 +1929,39 @@ document.getElementById('info-modal-ok-btn').addEventListener('click', this.hide
                     const productData = existingProductInfo.data;
                     let unitFound = false;
                     
-                    productData.pricingUnits = productData.pricingUnits.map(unit => {
-                        if (unit.barcode === barcode) {
-                            unitFound = true;
-                            // [PATCH] Update cost only when unit exists
-unit.cost = 
-                            parseFloat(row['ต้นทุน']) || unit.cost || 0;
-                            // [PATCH] Preserve existing defaultPrice on update
-// unit.defaultPrice = parseFloat(row['ราคา']) || unit.defaultPrice || 0;// [PATCH] Preserve existing priceTiers on update
-// 
-                            // [PATCH] Preserve existing priceTiers on update
-                        }
-                        return unit;
-                    });
+productData.pricingUnits = productData.pricingUnits.map(unit => {
+    if (unit.barcode === barcode) {
+        unitFound = true;
+        
+        // อัปเดตต้นทุน
+        unit.cost = parseFloat(row['ต้นทุน']) || unit.cost || 0;
+
+        // --- แก้ไข: บังคับอัปเดตราคาขายตาม Sheet ---
+        const newPrice = parseFloat(row['ราคา']);
+        
+        // ตรวจสอบว่าใน Sheet มีราคาใส่มาหรือไม่ ถ้ามีให้ทำการอัปเดต
+        if (!isNaN(newPrice) && newPrice > 0) {
+            // 1. อัปเดตราคาหลัก
+            unit.defaultPrice = newPrice;
+
+            // 2. อัปเดตราคาในตาราง Tier (สำหรับจำนวน 1 ชิ้น) เพื่อให้เวลาคิดเงินราคาเปลี่ยนจริง
+            if (unit.priceTiers && Array.isArray(unit.priceTiers)) {
+                const baseTier = unit.priceTiers.find(t => t.quantity === 1);
+                if (baseTier) {
+                    baseTier.price = newPrice;
+                } else {
+                    // ถ้าไม่มี Tier 1 ให้เพิ่มเข้าไป
+                    unit.priceTiers.push({ quantity: 1, price: newPrice });
+                }
+            } else {
+                // ถ้าไม่มีข้อมูล Tier เลย ให้สร้างใหม่
+                unit.priceTiers = [{ quantity: 1, price: newPrice }];
+            }
+        }
+        // -------------------------------------------
+    }
+    return unit;
+});
                     if (!unitFound && barcode) {
                         const defaultPrice = parseFloat(row['ราคา']) ||
                         0;

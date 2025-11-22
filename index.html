@@ -1934,33 +1934,25 @@ productData.pricingUnits = productData.pricingUnits.map(unit => {
     if (unit.barcode === barcode || (unit.barcode === "" && barcode === "")) {
         unitFound = true;
         
-        // 1. อัปเดตต้นทุน (Cost) จาก Sheet
+// 1. อัปเดตต้นทุน (Cost) จาก Sheet (คงส่วนนี้ไว้ เพื่อให้อัปเดตต้นทุนได้)
         unit.cost = parseFloat(row['ต้นทุน']) || unit.cost || 0;
 
-        // 2. อัปเดตราคาขาย (Price) แบบ "เจาะจง" ไม่ลบ Tier อื่น
-        const newPrice = parseFloat(row['ราคา']);
+        // [แก้ไข] ปิดการอัปเดตราคาขายอัตโนมัติ เพื่อรักษาการตั้งค่า Tier ราคาใน Firestore ไว้
+        /* const newPrice = parseFloat(row['ราคา']);
         if (!isNaN(newPrice) && newPrice > 0) {
-            
-            // อัปเดตราคา Default
             unit.defaultPrice = newPrice;
-
-            // ตรวจสอบว่ามี priceTiers เดิมอยู่ไหม
             if (unit.priceTiers && Array.isArray(unit.priceTiers)) {
-                // ค้นหา Tier ที่ขายจำนวน 1 ชิ้น (Quantity = 1)
                 const baseTier = unit.priceTiers.find(t => t.quantity === 1);
-                
                 if (baseTier) {
-                    // ถ้าเจอ: ให้อัปเดตราคาเฉพาะตัวนี้ (Tier อื่นๆ จะยังอยู่เหมือนเดิม) [cite: 1, 150]
                     baseTier.price = newPrice;
                 } else {
-                    // ถ้าไม่เจอ: ให้เพิ่ม Tier 1 ชิ้น เข้าไปใหม่ โดยไม่ไปยุ่งกับ Tier อื่น
                     unit.priceTiers.push({ quantity: 1, price: newPrice });
                 }
             } else {
-                // ถ้าไม่มีข้อมูล Tier เลย ให้สร้างใหม่
                 unit.priceTiers = [{ quantity: 1, price: newPrice }];
             }
         }
+        */
     }
     return unit;
 });
@@ -3891,4 +3883,5 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 })();
 </script>
+
 
